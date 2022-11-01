@@ -116,4 +116,45 @@ plt.xlabel('offset_start / lenTotal')
 plt.ylabel('Frecuencia')
 #plt.show()
 
+# ---------------------------MODELO NPS-------------------------------------------
+def search(palabra, texto):
+    M = len(palabra)
+    N = len(texto)
+ 
+    contador = 0
+    for i in range(N - M + 1):
+        j = 0
+ 
+        while(j < M):
+            if (texto[i + j] != palabra[j]):
+                break
+            j += 1
+ 
+        if (j == M):
+            print("Palabra",palabra,"encontrada en el índice", i)
+            contador = contador + 1
+    if contador != 0:    
+        print("La palabra", palabra, "fue utilizada", contador, "veces en el texto.")
+    
+    return contador
+ 
+texto = "tengo ADN en todo el cuerpo aaaaaa"
+palabra = "ADN"
+     
+search(palabra, texto)
+
+diccionario = df2['mention'].value_counts().index.tolist()
+
+abstractEjemplo = df1['abstract'][125]
+
+contadores = []
+for palabra in diccionario:
+    contadores.append(search(palabra, abstractEjemplo))
+
+palabras = []
+for i in range(len(contadores)):
+    if contadores[i]!=0:
+        palabras.append([diccionario[i],contadores[i]])
+        
+print(palabras)
 
