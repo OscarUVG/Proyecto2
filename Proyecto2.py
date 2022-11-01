@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
+from tqdm import tqdm
+import spacy
+from spacy.tokens import DocBin
 
 df1 = pd.read_csv('abstracts_train.csv', sep='\t')
 df2 = pd.read_csv('entities_train.csv', sep='\t')
@@ -157,4 +160,30 @@ for i in range(len(contadores)):
         palabras.append([diccionario[i],contadores[i]])
         
 print(palabras)
+
+# ==== NER ====
+
+df = pd.merge(df1, df2, how='right', on=['abstract_id'])
+dfT = df.iloc[:int(df.shape[0]*0.8)]
+TRAIN_DATA = []
+for i in range(dfT.shape[0]):
+    entry = dfT.loc[i]
+    abstract_id = entry['abstract_id']
+    start = entry['offset_start']
+    end = entry['offset_finish']
+    typeEntity = entry['type']
+    abstract = entry['abstract']
+    dataEntry = (abstract, {'entities': [(start, end, typeEntity)]})
+    TRAIN_DATA.append(dataEntry)
+
+
+nlp=spacy.blank("en")
+nlp.add_pipe('ner')
+nlp.begin_training()
+
+nlp = spacy.load('en_core_web_sm')
+sentence = df1.loc[0]['abstract']
+doc = nlp(sentence)
+for ent in doc.ents:
+    print(ent.text, ent.start_char, ent.end_char, ent.label_)
 
