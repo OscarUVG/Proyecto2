@@ -18,36 +18,34 @@ df2_test = df2.iloc[df2_train_size:]
 
 # Enfrenamiento del algoritmo
 
-fulls = df1_test['full'].tolist()
-mentions_dict = df2_train[['mention', 'type']].value_counts().index.tolist()
-for i in range(len(mentions_dict)):
-    mentions_dict[i] = (mentions_dict[i][0].replace('+','\+'), mentions_dict[i][1])
+def find_mentions(mentions_dict, full):
+    for i in range(len(mentions_dict)):
+        mentions_dict[i] = (mentions_dict[i][0].replace('+','\+'), mentions_dict[i][1])
 
-mentions_found = []
-for i in range(len(mentions_dict)): 
-    matches = re.finditer(r'\s'+mentions_dict[i][0]+'[\s.,;]', fulls[1])
-    new_mentions = [(m.span()[0], m.span()[1], mentions_dict[i][0]) for m in matches]
-    mentions_found += new_mentions
+    mentions_found = []
+    for mention in mentions_dict: 
+        matches = re.finditer(r'[\s(]'+mention[0]+'[\s.,;)]', full)
+        new_mentions = [(m.span()[0]+1, m.span()[1]-1, mention[0], mention[1]) for m in matches]
+        mentions_found += new_mentions
     
-print(fulls[1])
-print(10*'-')
-print(df2_test[df2_test['abstract_id'] == df1_test['abstract_id'].iloc[1]][['offset_start', 'offset_finish', 'mention']])
-print(10*'-')
-for mention in mentions_found:
-    print(mention,'\n')
+    mentions_found = sorted(mentions_found, key = lambda m: m[0])
+    return mentions_found
 
-            
+def translate_mentions(full, mentions_found):
+    new_full = []
+    i_full = 0
+    for mention in mentions_found:
+        new_full.append(full[i_full:mention[0]])
+        new_full.append((mention[2], mention[3]))
+        i_full = mention[1]
+    return new_full
+        
+mentions_dict = df2_train[['mention', 'type']].value_counts().index.tolist()
+full = df1_test['full'].iloc[-1]
 
+mentions_found = find_mentions(mentions_dict, full)
+translated_mentions = translate_mentions(full, mentions_found)
 
-
-
-
-
-
-
-
-
-# new_mentions = re.finditer(r'\s'+mention+'[\s,.;]', full)
-
+#print(df2_test[df2_test['abstract_id'] == df1_test['abstract_id'].iloc[-1]][['offset_start', 'offset_finish', 'mention']])
 
 
