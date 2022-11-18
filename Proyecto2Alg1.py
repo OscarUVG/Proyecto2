@@ -40,12 +40,20 @@ def translate_mentions(full, mentions_found):
         i_full = mention[1]
     return new_full
         
+def freq_mentions(mentions_found):
+    types = [m[3] for m in mentions_found]
+    types_df = pd.DataFrame({'Type':types})
+    freqs = types_df.value_counts()
+    return freqs
+        
 mentions_dict = df2_train[['mention', 'type']].value_counts().index.tolist()
 full = df1_test['full'].iloc[-1]
 
 mentions_found = find_mentions(mentions_dict, full)
 translated_mentions = translate_mentions(full, mentions_found)
 
+freqs = freq_mentions(mentions_found)
 #print(df2_test[df2_test['abstract_id'] == df1_test['abstract_id'].iloc[-1]][['offset_start', 'offset_finish', 'mention']])
 
 
+    
